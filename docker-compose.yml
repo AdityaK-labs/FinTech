@@ -1,0 +1,49 @@
+services:
+  web:
+    build: ./apps/web
+    ports:
+      - '3000:3000'
+    depends_on:
+      - gateway
+
+  gateway:
+    build: ./services/gateway
+    ports:
+      - '8000:8000'
+    environment:
+      - DATABASE_URL=postgresql://fintech:fintech@postgres:5432/fintech
+      - SECRET_KEY=super-secret-key
+    depends_on:
+      - postgres
+      - ingestion
+      - compliance
+      - anomaly
+
+  ingestion:
+    build: ./services/ingestion
+    ports:
+      - '8001:8001'
+
+  compliance:
+    build: ./services/compliance
+    ports:
+      - '8002:8002'
+
+  anomaly:
+    build: ./services/anomaly
+    ports:
+      - '8003:8003'
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: fintech
+      POSTGRES_USER: fintech
+      POSTGRES_PASSWORD: fintech
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
